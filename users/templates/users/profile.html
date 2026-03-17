@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ Sơ Cá Nhân - TeaVerse</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #4CAF50; }
+        a { text-decoration: none; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>Hồ Sơ Cá Nhân</h1>
+    <a href="/">Trang Chủ</a>
+    <p><strong>Tên:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Số điện thoại:</strong> {{ user.userprofile.phone }}</p>
+    <p><strong>Địa chỉ:</strong> {{ user.userprofile.address }}</p>
+    <!-- Thêm form chỉnh sửa -->
+</body>
+</html>

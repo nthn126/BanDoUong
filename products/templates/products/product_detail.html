@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Sản Phẩm - TeaVerse</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #4CAF50; }
+        img { max-width: 300px; }
+        a { text-decoration: none; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>{{ product.name }}</h1>
+    <a href="{% url 'product_list' %}">Quay Lại Danh Sách</a>
+    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    <p><strong>Giá:</strong> {{ product.price }} VND</p>
+    <p><strong>Mô tả:</strong> {{ product.description }}</p>
+    <p><strong>Thành phần:</strong> {{ product.ingredients }}</p>
+    <p><strong>Lượng calo:</strong> {{ product.calories }}</p>
+    <p><strong>Đánh giá:</strong> {{ product.rating }}</p>
+    <!-- Thêm form tùy chỉnh size, sugar, ice, toppings -->
+</body>
+</html>

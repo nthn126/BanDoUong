@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Sản Phẩm - TeaVerse</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #4CAF50; }
+        .product { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        .product img { max-width: 100px; }
+        a { text-decoration: none; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>Danh Sách Sản Phẩm</h1>
+    <a href="/">Trang Chủ</a>
+    {% for category in categories %}
+        <h2>{{ category.name }}</h2>
+        {% for product in products %}
+            {% if product.category == category %}
+                <div class="product">
+                    <h3><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h3>
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    <p>Giá: {{ product.price }} VND</p>
+                    <p>Mô tả: {{ product.description }}</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</body>
+</html>

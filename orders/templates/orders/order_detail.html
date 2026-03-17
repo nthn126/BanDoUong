@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Đơn Hàng - TeaVerse</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #4CAF50; }
+        a { text-decoration: none; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>Chi Tiết Đơn Hàng #{{ order.pk }}</h1>
+    <a href="{% url 'order_list' %}">Quay Lại Danh Sách</a>
+    <p><strong>Trạng thái:</strong> {{ order.get_status_display }}</p>
+    <p><strong>Tổng tiền:</strong> {{ order.total_price }} VND</p>
+    <p><strong>Địa chỉ giao:</strong> {{ order.shipping_address }}</p>
+    <p><strong>Phương thức thanh toán:</strong> {{ order.payment_method }}</p>
+    <h2>Sản Phẩm</h2>
+    {% for item in order.orderitem_set.all %}
+        <p>{{ item.product.name }} x{{ item.quantity }} - {{ item.price }} VND</p>
+    {% endfor %}
+</body>
+</html>

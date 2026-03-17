@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Đơn Hàng - TeaVerse</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #4CAF50; }
+        .order { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        a { text-decoration: none; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>Danh Sách Đơn Hàng</h1>
+    <a href="/">Trang Chủ</a>
+    {% for order in orders %}
+        <div class="order">
+            <h3><a href="{% url 'order_detail' order.pk %}">Đơn Hàng #{{ order.pk }}</a></h3>
+            <p>Trạng thái: {{ order.get_status_display }}</p>
+            <p>Tổng tiền: {{ order.total_price }} VND</p>
+            <p>Ngày đặt: {{ order.created_at }}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot AI - TeaVerse</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #4CAF50; }
+        #chat { border: 1px solid #ddd; height: 300px; overflow-y: scroll; padding: 10px; }
+        input { width: 80%; }
+        button { padding: 5px 10px; }
+        a { text-decoration: none; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>Chat với AI Tư Vấn Sản Phẩm</h1>
+    <a href="/">Trang Chủ</a>
+    <div id="chat"></div>
+    <input type="text" id="message" placeholder="Nhập tin nhắn...">
+    <button onclick="sendMessage()">Gửi</button>
+    <script>
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            // Thêm logic gửi message và nhận response từ AI (sẽ tích hợp sau)
+            document.getElementById('chat').innerHTML += '<p>Bạn: ' + message + '</p>';
+            document.getElementById('message').value = '';
+        }
+    </script>
+</body>
+</html>
