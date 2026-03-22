@@ -1,25 +1,408 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi Tiết Đơn Hàng - TeaVerse</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #4CAF50; }
-        a { text-decoration: none; color: #4CAF50; }
-    </style>
-</head>
-<body>
-    <h1>Chi Tiết Đơn Hàng #{{ order.pk }}</h1>
-    <a href="{% url 'order_list' %}">Quay Lại Danh Sách</a>
-    <p><strong>Trạng thái:</strong> {{ order.get_status_display }}</p>
-    <p><strong>Tổng tiền:</strong> {{ order.total_price }} VND</p>
-    <p><strong>Địa chỉ giao:</strong> {{ order.shipping_address }}</p>
-    <p><strong>Phương thức thanh toán:</strong> {{ order.payment_method }}</p>
-    <h2>Sản Phẩm</h2>
-    {% for item in order.orderitem_set.all %}
-        <p>{{ item.product.name }} x{{ item.quantity }} - {{ item.price }} VND</p>
-    {% endfor %}
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Chi Tiết Đơn Hàng #{{ order.pk }} - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .order-header {
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .order-header h1 {
+        color: white;
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+
+    .back-link {
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .back-link:hover {
+        color: white;
+        transform: translateX(-3px);
+    }
+
+    .order-grid {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .order-info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+    }
+
+    .info-section {
+        margin-bottom: 25px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid #E0E0E0;
+    }
+
+    .info-section:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .section-title {
+        color: #1B7236;
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        color: #2C3E50;
+    }
+
+    .info-label {
+        color: #7F8C8D;
+        font-weight: 600;
+    }
+
+    .info-value {
+        font-weight: 500;
+        color: #1B7236;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+
+    .status-pending {
+        background-color: #FFF3CD;
+        color: #856404;
+    }
+
+    .status-preparing {
+        background-color: #D1ECF1;
+        color: #0c5460;
+    }
+
+    .status-delivering {
+        background-color: #E2E3E5;
+        color: #383D41;
+    }
+
+    .status-delivered {
+        background-color: #D4EDDA;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background-color: #F8D7DA;
+        color: #721c24;
+    }
+
+    .order-items-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .order-item {
+        display: grid;
+        grid-template-columns: 80px 1fr 80px 120px;
+        gap: 20px;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #E0E0E0;
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .item-image {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #1B7236;
+    }
+
+    .item-details {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .item-name {
+        font-weight: bold;
+        color: #1B7236;
+    }
+
+    .item-specs {
+        font-size: 0.85rem;
+        color: #7F8C8D;
+    }
+
+    .item-qty {
+        text-align: center;
+        color: #2C3E50;
+        font-weight: 600;
+    }
+
+    .item-price {
+        text-align: right;
+        color: #FF6B6B;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .order-summary-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        color: #2C3E50;
+    }
+
+    .summary-row.total {
+        border-top: 2px solid #E0E0E0;
+        padding-top: 12px;
+        margin-top: 12px;
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #FF6B6B;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #1B7236;
+        border-color: #1B7236;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0d4620;
+    }
+
+    .btn-secondary {
+        background-color: transparent;
+        border-color: #1B7236;
+        color: #1B7236;
+    }
+
+    .btn-secondary:hover {
+        background-color: rgba(27, 114, 54, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .order-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .order-item {
+            grid-template-columns: 1fr;
+        }
+
+        .item-qty,
+        .item-price {
+            text-align: left;
+        }
+
+        .order-summary-card {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-detail-container">
+    <div class="order-header">
+        <a href="{% url 'order_list' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Quay Lại Danh Sách
+        </a>
+        <h1>
+            <i class="fas fa-box-open"></i> Đơn Hàng #{{ order.pk }}
+        </h1>
+    </div>
+
+    <div class="order-grid">
+        <div>
+            <!-- Order Items -->
+            <div class="order-items-section">
+                <h3 class="section-title">
+                    <i class="fas fa-list"></i> Sản Phẩm Đơn Hàng
+                </h3>
+                {% for item in order.orderitem_set.all %}
+                    <div class="order-item">
+                        <div class="item-image">
+                            <i class="fas fa-glass-citrus"></i>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-name">{{ item.product.name }}</div>
+                            <div class="item-specs">
+                                {{ item.size }} | {{ item.sugar }}% đường | {{ item.ice }} đá
+                            </div>
+                        </div>
+                        <div class="item-qty">x{{ item.quantity }}</div>
+                        <div class="item-price">
+                            {{ item.price|floatformat:0 }} VND
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Shipping Info -->
+            <div class="order-info-card">
+                <div class="info-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-map-marker-alt"></i> Địa Chỉ Giao Hàng
+                    </h3>
+                    <div class="info-item">
+                        <div class="info-value">{{ order.shipping_address }}</div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-credit-card"></i> Phương Thức Thanh Toán
+                    </h3>
+                    <div class="info-item">
+                        <div class="info-value">{{ order.payment_method }}</div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-history"></i> Lịch Sử Đơn Hàng
+                    </h3>
+                    <div class="info-item">
+                        <div class="info-label">Ngày Đặt:</div>
+                        <div class="info-value">{{ order.created_at|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Cập Nhật Cuối:</div>
+                        <div class="info-value">{{ order.updated_at|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Sidebar -->
+        <div class="order-summary-card">
+            <h3 class="section-title" style="margin-bottom: 20px;">
+                <i class="fas fa-receipt"></i> Tóm Tắt
+            </h3>
+
+            <div class="summary-row">
+                <span>Tạm tính:</span>
+                <strong>{{ order.total_price|floatformat:0 }} VND</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Phí vận chuyển:</span>
+                <span>Miễn phí</span>
+            </div>
+
+            <div class="summary-row">
+                <span>Khuyến mãi:</span>
+                <span>0 VND</span>
+            </div>
+
+            <div class="summary-row total">
+                <span>Tổng Cộng:</span>
+                <span>{{ order.total_price|floatformat:0 }} VND</span>
+            </div>
+
+            <div style="background-color: {% if order.status == 'delivered' %}#D4EDDA{% elif order.status == 'cancelled' %}#F8D7DA{% else %}#FFF3CD{% endif %}; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid">
+                <div class="status-badge status-{{ order.status }}">
+                    {{ order.get_status_display }}
+                </div>
+                <p style="margin: 10px 0 0 0; font-size: 0.85rem; color: #7F8C8D;">
+                    {% if order.status == 'pending' %}
+                        Đơn hàng đang chờ xác nhận
+                    {% elif order.status == 'preparing' %}
+                        Đơn hàng đang được chuẩn bị
+                    {% elif order.status == 'delivering' %}
+                        Đơn hàng đang được giao
+                    {% elif order.status == 'delivered' %}
+                        Đơn hàng đã được giao thành công
+                    {% elif order.status == 'cancelled' %}
+                        Đơn hàng đã bị hủy
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{% url 'order_list' %}" class="btn-action btn-secondary">
+                    <i class="fas fa-list"></i> Đơn Hàng Khác
+                </a>
+                <a href="/products/" class="btn-action btn-primary">
+                    <i class="fas fa-shopping-bag"></i> Mua Tiếp
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

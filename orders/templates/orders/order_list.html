@@ -1,26 +1,320 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Sách Đơn Hàng - TeaVerse</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #4CAF50; }
-        .order { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
-        a { text-decoration: none; color: #4CAF50; }
-    </style>
-</head>
-<body>
-    <h1>Danh Sách Đơn Hàng</h1>
-    <a href="/">Trang Chủ</a>
-    {% for order in orders %}
-        <div class="order">
-            <h3><a href="{% url 'order_detail' order.pk %}">Đơn Hàng #{{ order.pk }}</a></h3>
-            <p>Trạng thái: {{ order.get_status_display }}</p>
-            <p>Tổng tiền: {{ order.total_price }} VND</p>
-            <p>Ngày đặt: {{ order.created_at }}</p>
+{% extends 'base.html' %}
+
+{% block title %}Danh Sách Đơn Hàng - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .orders-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .orders-header h1 {
+        color: #1B7236;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .back-link {
+        color: #1B7236;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: #FF6B6B;
+    }
+
+    .orders-list {
+        display: grid;
+        gap: 20px;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+    }
+
+    .order-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .order-left {
+        padding: 25px;
+        flex: 1;
+        border-left: 4px solid #1B7236;
+    }
+
+    .order-right {
+        padding: 25px;
+        background-color: #F8F9FA;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-end;
+        min-width: 200px;
+    }
+
+    .order-id {
+        color: #1B7236;
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+
+    .order-info {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .order-info-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #7F8C8D;
+        font-size: 0.95rem;
+    }
+
+    .order-info-item strong {
+        color: #2C3E50;
+        min-width: 100px;
+    }
+
+    .order-status {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .status-pending {
+        background-color: #FFF3CD;
+        color: #856404;
+    }
+
+    .status-preparing {
+        background-color: #D1ECF1;
+        color: #0c5460;
+    }
+
+    .status-delivering {
+        background-color: #E2E3E5;
+        color: #383D41;
+    }
+
+    .status-delivered {
+        background-color: #D4EDDA;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background-color: #F8D7DA;
+        color: #721c24;
+    }
+
+    .order-total {
+        font-size: 1.5rem;
+        color: #FF6B6B;
+        font-weight: bold;
+        text-align: right;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .view-btn {
+        background-color: #1B7236;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .view-btn:hover {
+        background-color: #0d4620;
+    }
+
+    .no-orders {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 60px 20px;
+        text-align: center;
+        color: #7F8C8D;
+    }
+
+    .no-orders i {
+        font-size: 4rem;
+        color: #1B7236;
+        margin-bottom: 20px;
+    }
+
+    .no-orders h2 {
+        color: #1B7236;
+        margin-bottom: 10px;
+    }
+
+    .no-orders p {
+        margin-bottom: 30px;
+    }
+
+    .no-orders a {
+        display: inline-block;
+        background-color: #1B7236;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .no-orders a:hover {
+        background-color: #0d4620;
+        transform: translateY(-2px);
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 8px 16px;
+        background-color: white;
+        border: 2px solid #E0E0E0;
+        border-radius: 20px;
+        cursor: pointer;
+        text-decoration: none;
+        color: #7F8C8D;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .filter-tab:hover,
+    .filter-tab.active {
+        background-color: #1B7236;
+        border-color: #1B7236;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .order-card {
+            flex-direction: column;
+        }
+
+        .order-right {
+            align-items: flex-start;
+            border-left: 4px solid #1B7236;
+            padding: 20px;
+        }
+
+        .order-total {
+            text-align: left;
+        }
+
+        .order-actions {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-container">
+    <div class="orders-header">
+        <h1>
+            <i class="fas fa-list"></i> Danh Sách Đơn Hàng
+        </h1>
+        <a href="/products/" class="back-link">
+            <i class="fas fa-arrow-left"></i> Tiếp Tục Mua
+        </a>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <a href="?status=" class="filter-tab active">Tất Cả</a>
+        <a href="?status=pending" class="filter-tab">Chờ Xác Nhận</a>
+        <a href="?status=preparing" class="filter-tab">Đang Chuẩn Bị</a>
+        <a href="?status=delivering" class="filter-tab">Đang Giao</a>
+        <a href="?status=delivered" class="filter-tab">Đã Giao</a>
+    </div>
+
+    {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+                <a href="{% url 'order_detail' order.pk %}" class="order-card">
+                    <div class="order-left">
+                        <div class="order-id">
+                            <i class="fas fa-box"></i> Đơn hàng #{{ order.pk }}
+                        </div>
+                        
+                        <div class="order-status status-{{ order.status }}">
+                            {{ order.get_status_display }}
+                        </div>
+
+                        <div class="order-info">
+                            <div class="order-info-item">
+                                <strong><i class="fas fa-calendar"></i></strong>
+                                <span>{{ order.created_at|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            <div class="order-info-item">
+                                <strong><i class="fas fa-map-marker-alt"></i></strong>
+                                <span>{{ order.shipping_address|truncatewords:5 }}</span>
+                            </div>
+                            <div class="order-info-item">
+                                <strong><i class="fas fa-credit-card"></i></strong>
+                                <span>{{ order.payment_method }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-right">
+                        <div class="order-total">
+                            {{ order.total_price|floatformat:0 }} VND
+                        </div>
+                        <div style="color: #7F8C8D; font-size: 0.85rem; margin-top: 10px;">
+                            Cập nhật: {{ order.updated_at|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
         </div>
-    {% endfor %}
-</body>
-</html>
+    {% else %}
+        <div class="no-orders">
+            <i class="fas fa-inbox"></i>
+            <h2>Chưa Có Đơn Hàng Nào</h2>
+            <p>Bạn chưa đặt hàng. Hãy bắt đầu khám phá và mua sắm các sản phẩm yêu thích nhé!</p>
+            <a href="/products/">
+                <i class="fas fa-shopping-bag"></i> Khám Phá Sản Phẩm
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

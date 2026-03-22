@@ -1,22 +1,346 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ Sơ Cá Nhân - TeaVerse</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #4CAF50; }
-        a { text-decoration: none; color: #4CAF50; }
-    </style>
-</head>
-<body>
-    <h1>Hồ Sơ Cá Nhân</h1>
-    <a href="/">Trang Chủ</a>
-    <p><strong>Tên:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Số điện thoại:</strong> {{ user.userprofile.phone }}</p>
-    <p><strong>Địa chỉ:</strong> {{ user.userprofile.address }}</p>
-    <!-- Thêm form chỉnh sửa -->
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Hồ Sơ Cá Nhân - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin: 0 auto 20px;
+    }
+
+    .profile-header h1 {
+        color: white;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .profile-header p {
+        opacity: 0.9;
+        margin: 5px 0;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-left: 4px solid #1B7236;
+    }
+
+    .info-card h3 {
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-item {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #E0E0E0;
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #7F8C8D;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #2C3E50;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .info-value.empty {
+        color: #BDC3C7;
+        font-style: italic;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        flex: 1;
+        min-width: 150px;
+        padding: 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 2px solid;
+        cursor: pointer;
+    }
+
+    .btn-action-primary {
+        background-color: #1B7236;
+        border-color: #1B7236;
+        color: white;
+    }
+
+    .btn-action-primary:hover {
+        background-color: #0d4620;
+        border-color: #0d4620;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(27, 114, 54, 0.3);
+    }
+
+    .btn-action-secondary {
+        background-color: transparent;
+        border-color: #1B7236;
+        color: #1B7236;
+    }
+
+    .btn-action-secondary:hover {
+        background-color: rgba(27, 114, 54, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .btn-action-danger {
+        background-color: #FF6B6B;
+        border-color: #FF6B6B;
+        color: white;
+    }
+
+    .btn-action-danger:hover {
+        background-color: #FF5555;
+        border-color: #FF5555;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .orders-section {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .orders-section h3 {
+        color: #1B7236;
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .order-item {
+        padding: 15px;
+        border: 1px solid #E0E0E0;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .order-item:hover {
+        background-color: rgba(27, 114, 54, 0.05);
+        border-color: #1B7236;
+    }
+
+    .order-item a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .order-date {
+        color: #7F8C8D;
+        font-size: 0.9rem;
+    }
+
+    .order-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .order-status-pending {
+        background-color: #FFF3CD;
+        color: #856404;
+    }
+
+    .order-status-completed {
+        background-color: #D4EDDA;
+        color: #155724;
+    }
+
+    @media (max-width: 768px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Header -->
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <h1>{{ user.get_full_name|default:user.username }}</h1>
+        <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="profile-grid">
+        <!-- Personal Info -->
+        <div class="info-card">
+            <h3><i class="fas fa-user"></i> Thông Tin Cá Nhân</h3>
+            
+            <div class="info-item">
+                <div class="info-label">Tên Đầu Tiên</div>
+                <div class="info-value">{{ user.first_name|default:"Chưa cập nhật" }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Tên Cuối Cùng</div>
+                <div class="info-value">{{ user.last_name|default:"Chưa cập nhật" }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Tên Đăng Nhập</div>
+                <div class="info-value">{{ user.username }}</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ user.email }}</div>
+            </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="info-card">
+            <h3><i class="fas fa-phone"></i> Thông Tin Liên Hệ</h3>
+            
+            <div class="info-item">
+                <div class="info-label">Số Điện Thoại</div>
+                <div class="info-value {% if not user.userprofile.phone %}empty{% endif %}">
+                    {{ user.userprofile.phone|default:"Chưa cập nhật" }}
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Địa Chỉ</div>
+                <div class="info-value {% if not user.userprofile.address %}empty{% endif %}">
+                    {{ user.userprofile.address|default:"Chưa cập nhật" }}
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Ngày Tham Gia</div>
+                <div class="info-value">{{ user.date_joined|date:"d/m/Y" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="/orders/" class="btn-action btn-action-primary">
+            <i class="fas fa-box"></i> Xem Đơn Hàng
+        </a>
+        <a href="{% url 'cart' %}" class="btn-action btn-action-primary">
+            <i class="fas fa-shopping-cart"></i> Giỏ Hàng
+        </a>
+        <a href="/products/" class="btn-action btn-action-secondary">
+            <i class="fas fa-shopping-bag"></i> Tiếp Tục Mua
+        </a>
+    </div>
+
+    <!-- Orders Section -->
+    <div class="orders-section" style="margin-top: 40px;">
+        <h3><i class="fas fa-history"></i> Đơn Hàng Gần Đây</h3>
+        {% if recent_orders %}
+            {% for order in recent_orders|slice:":3" %}
+                <a href="/orders/{{ order.id }}/" class="order-item">
+                    <strong>Đơn hàng #{{ order.id }}</strong>
+                    <div class="order-date">
+                        <i class="fas fa-calendar-alt"></i> {{ order.created_at|date:"d/m/Y H:i" }}
+                    </div>
+                    <div>
+                        <strong>{{ order.total_price|floatformat:0 }} VND</strong>
+                    </div>
+                    <div class="order-status {% if order.status == 'delivered' %}order-status-completed{% else %}order-status-pending{% endif %}">
+                        {{ order.get_status_display }}
+                    </div>
+                </a>
+            {% endfor %}
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/orders/" style="color: #1B7236; text-decoration: none; font-weight: 600;">
+                    <i class="fas fa-arrow-right"></i> Xem tất cả đơn hàng
+                </a>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 30px; color: #7F8C8D;">
+                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                <p>Bạn chưa có đơn hàng nào. Hãy bắt đầu mua sắm ngay!</p>
+                <a href="/products/" class="btn-action btn-action-primary" style="display: inline-flex; margin-top: 15px;">
+                    <i class="fas fa-shopping-bag"></i> Khám Phá Sản Phẩm
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

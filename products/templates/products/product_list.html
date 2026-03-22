@@ -1,32 +1,287 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Sách Sản Phẩm - TeaVerse</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #4CAF50; }
-        .product { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
-        .product img { max-width: 100px; }
-        a { text-decoration: none; color: #4CAF50; }
-    </style>
-</head>
-<body>
-    <h1>Danh Sách Sản Phẩm</h1>
-    <a href="/">Trang Chủ</a>
-    {% for category in categories %}
-        <h2>{{ category.name }}</h2>
-        {% for product in products %}
-            {% if product.category == category %}
-                <div class="product">
-                    <h3><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h3>
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
-                    <p>Giá: {{ product.price }} VND</p>
-                    <p>Mô tả: {{ product.description }}</p>
-                </div>
-            {% endif %}
-        {% endfor %}
-    {% endfor %}
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Danh Sách Sản Phẩm - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-filter {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+        position: sticky;
+        top: 90px;
+    }
+
+    .category-filter h5 {
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #FF6B6B;
+    }
+
+    .category-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .category-list li {
+        margin-bottom: 8px;
+    }
+
+    .category-list a {
+        color: #7F8C8D;
+        text-decoration: none;
+        display: block;
+        padding: 8px 10px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .category-list a:hover {
+        background-color: rgba(27, 114, 54, 0.1);
+        color: #1B7236;
+        padding-left: 15px;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    .product-item {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-item:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .product-image-wrapper {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: #1B7236;
+        overflow: hidden;
+    }
+
+    .product-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-details {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-name {
+        font-weight: bold;
+        color: #1B7236;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .product-price {
+        color: #FF6B6B;
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .product-description {
+        color: #7F8C8D;
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+        flex-grow: 1;
+        line-height: 1.5;
+    }
+
+    .star-rating {
+        color: #FFA500;
+        margin-bottom: 10px;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-sm {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    .btn-view {
+        flex: 1;
+        background-color: #1B7236;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px;
+        text-decoration: none;
+        text-align: center;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-view:hover {
+        background-color: #0d4620;
+        transform: translateY(-2px);
+    }
+
+    .btn-add-cart {
+        flex: 1;
+        background-color: #FF6B6B;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px;
+        text-decoration: none;
+        text-align: center;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-add-cart:hover {
+        background-color: #FF5555;
+        transform: translateY(-2px);
+    }
+
+    .no-products {
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 12px;
+        color: #7F8C8D;
+    }
+
+    .no-products i {
+        font-size: 3rem;
+        color: #1B7236;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .product-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .category-filter {
+            position: static;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">
+    <i class="fas fa-list"></i> Danh Sách Sản Phẩm
+</h1>
+
+<div class="row">
+    <!-- Sidebar Category Filter -->
+    <div class="col-lg-3 col-md-4">
+        <div class="category-filter">
+            <h5><i class="fas fa-filter"></i> Danh Mục</h5>
+            <ul class="category-list">
+                <li><a href="/products/"><i class="fas fa-check-circle"></i> Tất Cả Sản Phẩm</a></li>
+                {% for category in categories %}
+                    <li>
+                        <a href="?category={{ category.id }}">
+                            <i class="fas fa-tag"></i> {{ category.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="col-lg-9 col-md-8">
+        {% if products %}
+            <div class="product-grid">
+                {% for product in products %}
+                    <div class="product-item">
+                        <div class="product-image-wrapper">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            {% else %}
+                                <i class="fas fa-glass-citrus"></i>
+                            {% endif %}
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-name">
+                                <a href="{% url 'product_detail' product.pk %}" style="text-decoration: none; color: inherit;">
+                                    {{ product.name }}
+                                </a>
+                            </h3>
+                            <div class="star-rating">
+                                {% with rating=product.rating|default:0 %}
+                                    {% for i in "12345" %}
+                                        {% if i <= rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% elif i|add:"-0.5" <= rating %}
+                                            <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                                <small>({{ product.rating|default:0 }} sao)</small>
+                            </div>
+                            <div class="product-price">{{ product.price|floatformat:0 }} VND</div>
+                            <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                            <div class="product-actions">
+                                <a href="{% url 'product_detail' product.pk %}" class="btn-view">
+                                    <i class="fas fa-eye"></i> Chi Tiết
+                                </a>
+                                <button class="btn-add-cart" onclick="addToCart({{ product.pk }})">
+                                    <i class="fas fa-shopping-cart"></i> Thêm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-products">
+                <div><i class="fas fa-inbox"></i></div>
+                <h3>Không có sản phẩm nào</h3>
+                <p>Xin lỗi, hiện tại không có sản phẩm trong danh mục này. Vui lòng thử lại sau!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function addToCart(productId) {
+    alert('Vui lòng xem chi tiết sản phẩm để chọn kích thước và tùy chọn!');
+    window.location.href = `/products/` + productId;
+}
+</script>
+{% endblock %}

@@ -1,25 +1,409 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi Tiết Sản Phẩm - TeaVerse</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #4CAF50; }
-        img { max-width: 300px; }
-        a { text-decoration: none; color: #4CAF50; }
-    </style>
-</head>
-<body>
-    <h1>{{ product.name }}</h1>
-    <a href="{% url 'product_list' %}">Quay Lại Danh Sách</a>
-    <img src="{{ product.image.url }}" alt="{{ product.name }}">
-    <p><strong>Giá:</strong> {{ product.price }} VND</p>
-    <p><strong>Mô tả:</strong> {{ product.description }}</p>
-    <p><strong>Thành phần:</strong> {{ product.ingredients }}</p>
-    <p><strong>Lượng calo:</strong> {{ product.calories }}</p>
-    <p><strong>Đánh giá:</strong> {{ product.rating }}</p>
-    <!-- Thêm form tùy chỉnh size, sugar, ice, toppings -->
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .product-header {
+        margin-bottom: 30px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #1B7236;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .back-link:hover {
+        color: #FF6B6B;
+        transform: translateX(-3px);
+    }
+
+    .product-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .product-image-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 400px;
+        background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 5rem;
+        color: #1B7236;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    .product-info-section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-name {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1B7236;
+        margin-bottom: 15px;
+    }
+
+    .product-price {
+        font-size: 2.5rem;
+        color: #FF6B6B;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        color: #FFA500;
+    }
+
+    .product-rating span {
+        color: #7F8C8D;
+    }
+
+    .product-description {
+        color: #2C3E50;
+        line-height: 1.8;
+        margin-bottom: 25px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid #E0E0E0;
+    }
+
+    .product-specs {
+        margin-bottom: 25px;
+    }
+
+    .specs-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 12px;
+        color: #2C3E50;
+    }
+
+    .specs-item strong {
+        color: #1B7236;
+        min-width: 100px;
+    }
+
+    .customization-section {
+        background-color: #F8F9FA;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .customization-section h3 {
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #1B7236;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #E0E0E0;
+        border-radius: 8px;
+        font-size: 1rem;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .form-group select:focus {
+        outline: none;
+        border-color: #1B7236;
+        box-shadow: 0 0 0 3px rgba(27, 114, 54, 0.1);
+    }
+
+    .form-group select option {
+        padding: 8px;
+    }
+
+    .quantity-section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 25px;
+    }
+
+    .quantity-section label {
+        color: #1B7236;
+        font-weight: 600;
+    }
+
+    .quantity-input {
+        width: 80px;
+        padding: 10px;
+        border: 2px solid #E0E0E0;
+        border-radius: 8px;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .quantity-input:focus {
+        outline: none;
+        border-color: #1B7236;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn-add-cart {
+        flex: 1;
+        padding: 14px;
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(27, 114, 54, 0.3);
+    }
+
+    .btn-wishlist {
+        padding: 14px 20px;
+        background-color: white;
+        border: 2px solid #FF6B6B;
+        border-radius: 8px;
+        color: #FF6B6B;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-wishlist:hover {
+        background-color: #FF6B6B;
+        color: white;
+    }
+
+    .related-products {
+        margin-top: 60px;
+    }
+
+    .related-products h3 {
+        color: #1B7236;
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .product-content {
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        .product-name {
+            font-size: 1.5rem;
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-wishlist {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="product-detail-container">
+    <a href="{% url 'product_list' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Quay Lại Danh Sách
+    </a>
+
+    <div class="product-content">
+        <!-- Product Image -->
+        <div class="product-image-section">
+            <div class="product-image">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <i class="fas fa-glass-citrus"></i>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info-section">
+            <h1 class="product-name">{{ product.name }}</h1>
+            
+            <div class="product-price">{{ product.price|floatformat:0 }} VND</div>
+
+            <div class="product-rating">
+                {% with rating=product.rating|default:0 %}
+                    {% for i in "12345" %}
+                        {% if i <= rating %}
+                            <i class="fas fa-star"></i>
+                        {% elif i|add:"-0.5" <= rating %}
+                            <i class="fas fa-star-half-alt"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                {% endwith %}
+                <span>({{ product.rating|default:"Chưa có đánh giá" }})</span>
+            </div>
+
+            <div class="product-description">
+                {{ product.description }}
+            </div>
+
+            <!-- Product Specs -->
+            <div class="product-specs">
+                <div class="specs-item">
+                    <strong><i class="fas fa-leaf"></i> Thành phần:</strong>
+                    <span>{{ product.ingredients|default:"Không có thông tin" }}</span>
+                </div>
+                <div class="specs-item">
+                    <strong><i class="fas fa-fire"></i> Calo:</strong>
+                    <span>{{ product.calories|default:"Không có thông tin" }} kcal</span>
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'add_to_cart' product.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="customization-section">
+                        <h3><i class="fas fa-sliders-h"></i> Tùy Chỉnh Thức Uống</h3>
+
+                        <div class="form-group">
+                            <label for="size">
+                                <i class="fas fa-cup-togo"></i> Kích Cỡ
+                            </label>
+                            <select name="size" id="size" required>
+                                <option value="S">Nhỏ (S) - 250ml</option>
+                                <option value="M" selected>Vừa (M) - 350ml</option>
+                                <option value="L">Lớn (L) - 500ml</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sugar">
+                                <i class="fas fa-cube"></i> Mức Đường
+                            </label>
+                            <select name="sugar" id="sugar" required>
+                                <option value="0">Không đường (0%)</option>
+                                <option value="30">Ít đường (30%)</option>
+                                <option value="50" selected>Mặc định (50%)</option>
+                                <option value="70">Nhiều đường (70%)</option>
+                                <option value="100">Đặc điểm (100%)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ice">
+                                <i class="fas fa-snowflake"></i> Mức Đá
+                            </label>
+                            <select name="ice" id="ice" required>
+                                <option value="low">Ít đá</option>
+                                <option value="medium" selected>Vừa đá</option>
+                                <option value="high">Nhiều đá</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="quantity-section">
+                        <label for="quantity">
+                            <i class="fas fa-shopping-cart"></i> Số Lượng:
+                        </label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="10" class="quantity-input">
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="btn-add-cart">
+                            <i class="fas fa-shopping-cart"></i> Thêm Vào Giỏ Hàng
+                        </button>
+                        <button type="button" class="btn-wishlist" onclick="addToWishlist()">
+                            <i class="far fa-heart"></i> Yêu Thích
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div style="background-color: #E3F2FD; padding: 20px; border-radius: 8px; border-left: 4px solid #1B7236; margin-top: 20px;">
+                    <p style="color: #1565C0; margin: 0;">
+                        <i class="fas fa-info-circle"></i> 
+                        Vui lòng <a href="{% url 'login' %}" style="font-weight: 600; color: #1565C0;">đăng nhập</a> để thêm sản phẩm vào giỏ hàng.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function addToWishlist() {
+    alert('Chức năng yêu thích sẽ được thêm sớm!');
+}
+</script>
+{% endblock %}
+    {% else %}
+        <p>Vui lòng <a href="{% url 'login' %}">đăng nhập</a> để thêm vào giỏ hàng.</p>
+    {% endif %}
 </body>
 </html>

@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Đăng Ký - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        padding: 20px;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        width: 100%;
+        max-width: 450px;
+        padding: 40px;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .auth-header h1 {
+        color: #1B7236;
+        font-size: 2rem;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    .auth-header p {
+        color: #7F8C8D;
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #1B7236;
+        font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #E0E0E0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #1B7236;
+        box-shadow: 0 0 0 3px rgba(27, 114, 54, 0.1);
+    }
+
+    .form-group input::placeholder {
+        color: #BDC3C7;
+    }
+
+    .form-group ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 10px;
+    }
+
+    .form-group ul li {
+        margin-bottom: 8px;
+        color: #7F8C8D;
+        font-size: 0.9rem;
+    }
+
+    .form-group ul li strong {
+        color: #FF6B6B;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(27, 114, 54, 0.3);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #E0E0E0;
+    }
+
+    .auth-footer p {
+        color: #7F8C8D;
+    }
+
+    .auth-footer a {
+        color: #1B7236;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .auth-footer a:hover {
+        color: #FF6B6B;
+    }
+
+    .messages {
+        margin-bottom: 20px;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+    }
+
+    .errorlist li {
+        color: #721c24;
+        background-color: #f8d7da;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border-left: 4px solid #FF6B6B;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+
+    .back-home {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .back-home a {
+        color: #1B7236;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .back-home a:hover {
+        color: #FF6B6B;
+        transform: translateX(-3px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="back-home">
+            <a href="/"><i class="fas fa-arrow-left"></i> Quay Lại Trang Chủ</a>
+        </div>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="auth-header">
+            <h1><i class="fas fa-user-plus"></i> Đăng Ký Tài Khoản</h1>
+            <p>Tham gia cộng đồng TeaVerse ngay bây giờ</p>
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="form-group">
+                    <ul class="errorlist">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if field.help_text %}
+                        <small style="color: #7F8C8D; display: block; margin-top: 5px;">{{ field.help_text|safe }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-user-plus"></i> Tạo Tài Khoản
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Đã có tài khoản? 
+                <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+</html>

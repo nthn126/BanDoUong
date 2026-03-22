@@ -1,30 +1,436 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot AI - TeaVerse</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #4CAF50; }
-        #chat { border: 1px solid #ddd; height: 300px; overflow-y: scroll; padding: 10px; }
-        input { width: 80%; }
-        button { padding: 5px 10px; }
-        a { text-decoration: none; color: #4CAF50; }
-    </style>
-</head>
-<body>
-    <h1>Chat với AI Tư Vấn Sản Phẩm</h1>
-    <a href="/">Trang Chủ</a>
-    <div id="chat"></div>
-    <input type="text" id="message" placeholder="Nhập tin nhắn...">
-    <button onclick="sendMessage()">Gửi</button>
-    <script>
-        function sendMessage() {
-            const message = document.getElementById('message').value;
-            // Thêm logic gửi message và nhận response từ AI (sẽ tích hợp sau)
-            document.getElementById('chat').innerHTML += '<p>Bạn: ' + message + '</p>';
+{% extends 'base.html' %}
+
+{% block title %}Chatbot AI Tư Vấn - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chatbot-container {
+        max-width: 900px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+    }
+
+    .chat-box {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        display: flex;
+        flex-direction: column;
+        height: 600px;
+    }
+
+    .chat-header {
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .chat-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+    }
+
+    .chat-status {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background-color: #4CAF50;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background-color: #F8F9FA;
+    }
+
+    .message {
+        display: flex;
+        gap: 10px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message.user {
+        justify-content: flex-end;
+    }
+
+    .message-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .message.bot .message-avatar {
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+    }
+
+    .message.user .message-avatar {
+        background-color: #FFA500;
+    }
+
+    .message-content {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        word-wrap: break-word;
+    }
+
+    .message.bot .message-content {
+        background-color: white;
+        color: #2C3E50;
+        border-left: 4px solid #1B7236;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .message.user .message-content {
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        color: #BDC3C7;
+        margin-top: 4px;
+    }
+
+    .input-box {
+        padding: 15px;
+        border-top: 1px solid #E0E0E0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
+
+    #message {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #E0E0E0;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+    }
+
+    #message:focus {
+        outline: none;
+        border-color: #1B7236;
+        box-shadow: 0 0 0 3px rgba(27, 114, 54, 0.1);
+    }
+
+    .send-btn {
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(27, 114, 54, 0.3);
+    }
+
+    .send-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Sidebar */
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 20px;
+    }
+
+    .info-card h3 {
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quick-replies {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .quick-btn {
+        padding: 10px;
+        background-color: #F0F7FF;
+        border: 2px solid #E0E0E0;
+        border-radius: 8px;
+        color: #1B7236;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+        font-size: 0.9rem;
+    }
+
+    .quick-btn:hover {
+        background-color: #E8F5E9;
+        border-color: #1B7236;
+        transform: translateX(5px);
+    }
+
+    .info-card p {
+        color: #7F8C8D;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .chatbot-container {
+            grid-template-columns: 1fr;
+        }
+
+        .chat-box {
+            height: 500px;
+        }
+
+        .message-content {
+            max-width: 85%;
+        }
+
+        .sidebar {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .info-card {
+            flex: 1;
+            min-width: 150px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">
+    <i class="fas fa-robot"></i> Chatbot AI Tư Vấn Sản Phẩm
+</h1>
+
+<div class="chatbot-container">
+    <!-- Chat Box -->
+    <div class="chat-box">
+        <div class="chat-header">
+            <div class="chat-status"></div>
+            <h2>TeaVerse AI Assistant</h2>
+        </div>
+
+        <div class="messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-avatar">AI</div>
+                <div>
+                    <div class="message-content">
+                        Xin chào! 👋 Tôi là trợ lý AI của TeaVerse. Tôi có thể giúp bạn:
+                        <br><br>
+                        ✅ Tư vấn về các sản phẩm<br>
+                        ✅ Giải thích về thành phần<br>
+                        ✅ Gợi ý thức uống phù hợp<br>
+                        ✅ Trả lời câu hỏi chung
+                    </div>
+                    <div class="message-time">Vừa xong</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-box">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="message" 
+                    placeholder="Nhập câu hỏi hoặc tin nhắn của bạn..." 
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i> Gửi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Quick Replies -->
+        <div class="info-card">
+            <h3><i class="fas fa-lightning-bolt"></i> Câu Hỏi Nhanh</h3>
+            <div class="quick-replies">
+                <button class="quick-btn" onclick="quickReply('Có sản phẩm nào không chứa đường?')">
+                    <i class="fas fa-leaf"></i> Không chứa đường
+                </button>
+                <button class="quick-btn" onclick="quickReply('Trà xanh có bao nhiêu calo?')">
+                    <i class="fas fa-fire"></i> Thông tin calo
+                </button>
+                <button class="quick-btn" onclick="quickReply('Tôi cần gì để đặt hàng?')">
+                    <i class="fas fa-shopping-cart"></i> Đặt hàng
+                </button>
+                <button class="quick-btn" onclick="quickReply('Phí giao hàng là bao nhiêu?')">
+                    <i class="fas fa-truck"></i> Phí vận chuyển
+                </button>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="info-card">
+            <h3><i class="fas fa-question-circle"></i> Câu Hỏi Phổ Biến</h3>
+            <p>
+                <strong>🕐 Giờ hoạt động:</strong> 8:00 - 22:00<br>
+                <strong>📍 Giao hàng:</strong> Khắp thành phố<br>
+                <strong>💳 Thanh toán:</strong> COD, Momo, Transfer
+            </p>
+        </div>
+
+        <!-- Support -->
+        <div class="info-card">
+            <h3><i class="fas fa-headset"></i> Hỗ Trợ</h3>
+            <p>
+                📞 <strong>Hotline:</strong> 0123 456 789<br>
+                📧 <strong>Email:</strong> info@teaverse.vn<br>
+                💬 <strong>Chat:</strong> Luôn sẵn sàng 24/7
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+const responses = {
+    'không chứa đường': 'Chúng tôi có cà phê đen không đường, trà xanh 0% đường, và các thức uống khác có thể điều chỉnh độ ngọt. Bạn có muốn tìm hiểu thêm?',
+    'calo': 'Trà xanh khoảng 5-10 calo, cà phê đen 0-5 calo, và các đồ uống khác tùy theo thành phần. Tôi có thể giúp tìm thức uống phù hợp với mục tiêu sức khỏe của bạn!',
+    'đặt hàng': 'Để đặt hàng: 1) Chọn sản phẩm 2) Tùy chỉnh (kích thước, đường, đá) 3) Thêm vào giỏ hàng 4) Điền địa chỉ 5) Chọn thanh toán. Simple!',
+    'vận chuyển': 'Phí vận chuyển MIỄN PHÍ cho tất cả đơn hàng! Giao hàng trong 24-48 giờ ở khắp thành phố.',
+    'trà': 'Chúng tôi có: Trà xanh nhài, Trà đen lạnh, Trà oolong, Trà hoa cúc... Thích loại nào?',
+    'cà phê': 'Cà phê đen lạnh, Cà phê sữa, Cà phê caramel, Cà phê espresso... Tất cả đều làm từ hạt cà phê chất lượng!',
+    'hello': 'Chào bạn! 👋 Tôi là AI của TeaVerse. Có gì tôi có thể giúp?',
+    'default': 'Xin lỗi, tôi chưa hiểu rõ câu hỏi của bạn 🤔 Có thể bạn muốn hỏi về: sản phẩm, giá cả, đặt hàng, hay giao hàng? Hãy thử câu hỏi nhanh ở bên cạnh!'
+};
+
+function sendMessage() {
+    const inputElement = document.getElementById('message');
+    const message = inputElement.value.trim().toLowerCase();
+    
+    if (!message) return;
+
+    // Add user message
+    addMessage(message, 'user');
+    inputElement.value = '';
+
+    // Find response
+    let response = responses.default;
+    for (let key in responses) {
+        if (message.includes(key)) {
+            response = responses[key];
+            break;
+        }
+    }
+
+    // Add bot response
+    setTimeout(() => {
+        addMessage(response, 'bot');
+    }, 500);
+}
+
+function quickReply(question) {
+    document.getElementById('message').value = question;
+    sendMessage();
+}
+
+function addMessage(text, sender) {
+    const messagesDiv = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.textContent = sender === 'user' ? 'Bạn' : 'AI';
+    
+    const contentDiv = document.createElement('div');
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    content.textContent = text;
+    
+    const time = document.createElement('div');
+    time.className = 'message-time';
+    time.textContent = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    
+    contentDiv.appendChild(content);
+    contentDiv.appendChild(time);
+    
+    if (sender === 'user') {
+        messageDiv.appendChild(contentDiv);
+        messageDiv.appendChild(avatar);
+    } else {
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(contentDiv);
+    }
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+</script>
+{% endblock %}
             document.getElementById('message').value = '';
+            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
         }
     </script>
 </body>

@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+
+{% block title %}Thanh Toán - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .checkout-header h1 {
+        color: #1B7236;
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+
+    .checkout-content {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+    }
+
+    .order-items {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .order-items h3 {
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #E0E0E0;
+    }
+
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px solid #E0E0E0;
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .item-name {
+        flex: 1;
+        color: #1B7236;
+        font-weight: 600;
+    }
+
+    .item-qty {
+        color: #7F8C8D;
+        margin: 0 20px;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .item-price {
+        color: #FF6B6B;
+        font-weight: bold;
+        min-width: 100px;
+        text-align: right;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .form-section h3 {
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #E0E0E0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #1B7236;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #E0E0E0;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #1B7236;
+        box-shadow: 0 0 0 3px rgba(27, 114, 54, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .payment-options {
+        display: grid;
+        gap: 10px;
+    }
+
+    .payment-option {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 2px solid #E0E0E0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .payment-option:hover {
+        border-color: #1B7236;
+        background-color: rgba(27, 114, 54, 0.02);
+    }
+
+    .payment-option input[type="radio"] {
+        width: auto;
+        margin-right: 15px;
+        cursor: pointer;
+    }
+
+    .payment-info {
+        flex: 1;
+    }
+
+    .payment-name {
+        font-weight: 600;
+        color: #1B7236;
+        margin-bottom: 4px;
+    }
+
+    .payment-desc {
+        color: #7F8C8D;
+        font-size: 0.9rem;
+    }
+
+    /* Sidebar Summary */
+    .order-summary {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+
+    .order-summary h3 {
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #E0E0E0;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        color: #7F8C8D;
+    }
+
+    .summary-total {
+        border-top: 2px solid #E0E0E0;
+        padding-top: 12px;
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #FF6B6B;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(27, 114, 54, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .checkout-content {
+            grid-template-columns: 1fr;
+        }
+
+        .order-summary {
+            position: static;
+            margin-top: 30px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1>
+            <i class="fas fa-credit-card"></i> Thanh Toán
+        </h1>
+    </div>
+
+    <div class="checkout-content">
+        <!-- Main Content -->
+        <div>
+            <!-- Order Items -->
+            <div class="order-items">
+                <h3><i class="fas fa-box"></i> Sản Phẩm Đơn Hàng</h3>
+                {% for item in items %}
+                    <div class="order-item">
+                        <div class="item-name">
+                            {{ item.product.name }}
+                            <div style="font-size: 0.85rem; color: #7F8C8D; margin-top: 5px;">
+                                {{ item.size }} | {{ item.sugar }}% đường | {{ item.ice }} đá
+                            </div>
+                        </div>
+                        <div class="item-qty">x{{ item.quantity }}</div>
+                        <div class="item-price">
+                            {{ item.product.price|mul:item.quantity|floatformat:0 }} VND
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="form-section">
+                <h3><i class="fas fa-map-marker-alt"></i> Địa Chỉ Giao Hàng</h3>
+                <form method="post" id="checkoutForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label>Họ Và Tên</label>
+                        <input type="text" name="fullname" placeholder="Nhập họ và tên" value="{{ user.get_full_name }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Số Điện Thoại</label>
+                        <input type="tel" name="phone" placeholder="Nhập số điện thoại" value="{{ user.userprofile.phone|default:'' }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Địa Chỉ Chi Tiết</label>
+                        <textarea name="shipping_address" placeholder="Nhập địa chỉ giao hàng đầy đủ (Số nhà, đường, quận, thành phố)" required>{{ user.userprofile.address|default:'' }}</textarea>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-wallet"></i> Phương Thức Thanh Toán</h3>
+                        
+                        <div class="payment-options">
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="COD" checked>
+                                <div class="payment-info">
+                                    <div class="payment-name">Thanh Toán Khi Nhận Hàng (COD)</div>
+                                    <div class="payment-desc">Thanh toán trực tiếp cho shipper</div>
+                                </div>
+                            </label>
+
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="Momo">
+                                <div class="payment-info">
+                                    <div class="payment-name"><i class="fab fa-wallet"></i> Momo</div>
+                                    <div class="payment-desc">Thanh toán qua ứng dụng Momo</div>
+                                </div>
+                            </label>
+
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="Transfer">
+                                <div class="payment-info">
+                                    <div class="payment-name"><i class="fas fa-bank"></i> Chuyển Khoản Ngân Hàng</div>
+                                    <div class="payment-desc">Chuyển khoản trước khi giao hàng</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" form="checkoutForm">
+                        <i class="fas fa-check-circle"></i> Xác Nhận Đặt Hàng
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="order-summary">
+            <h3><i class="fas fa-receipt"></i> Tóm Tắt</h3>
+            
+            <div class="summary-item">
+                <span>Tiền hàng:</span>
+                <strong>{{ total|floatformat:0 }} VND</strong>
+            </div>
+
+            <div class="summary-item">
+                <span>Phí vận chuyển:</span>
+                <strong>Miễn phí</strong>
+            </div>
+
+            <div class="summary-item">
+                <span>Giảm giá:</span>
+                <strong>0 VND</strong>
+            </div>
+
+            <div class="summary-total">
+                <span>Tổng Cộng:</span>
+                <span>{{ total|floatformat:0 }} VND</span>
+            </div>
+
+            <div style="background-color: #F0F7FF; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #1B7236;">
+                <div style="color: #1B7236; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px;">
+                    <i class="fas fa-info-circle"></i> Lưu Ý
+                </div>
+                <ul style="margin: 0; padding-left: 20px; color: #7F8C8D; font-size: 0.85rem;">
+                    <li>Kiểm tra lại thông tin trước khi đặt</li>
+                    <li>Đơn hàng sẽ được giao trong 24-48h</li>
+                    <li>Bạn sẽ nhận tin nhắn xác nhận</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

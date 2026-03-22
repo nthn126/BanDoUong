@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+
+{% block title %}Giỏ Hàng - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .cart-header h1 {
+        color: #1B7236;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .continue-shopping {
+        color: #1B7236;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .continue-shopping:hover {
+        color: #FF6B6B;
+    }
+
+    .cart-items {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+
+    .cart-item {
+        padding: 20px;
+        border-bottom: 1px solid #E0E0E0;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .cart-item:hover {
+        background-color: rgba(27, 114, 54, 0.02);
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .item-image {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: #1B7236;
+        flex-shrink: 0;
+    }
+
+    .item-details {
+        flex: 1;
+    }
+
+    .item-name {
+        font-weight: bold;
+        color: #1B7236;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .item-specs {
+        color: #7F8C8D;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .item-price {
+        color: #FF6B6B;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .qty-btn {
+        width: 30px;
+        height: 30px;
+        border: 1px solid #E0E0E0;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .qty-btn:hover {
+        border-color: #1B7236;
+        color: #1B7236;
+    }
+
+    .item-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .subtotal {
+        font-weight: bold;
+        color: #1B7236;
+        font-size: 1.1rem;
+        min-width: 120px;
+        text-align: right;
+    }
+
+    .remove-btn {
+        background-color: #FF6B6B;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .remove-btn:hover {
+        background-color: #FF5555;
+    }
+
+    .cart-empty {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 60px 20px;
+        text-align: center;
+        color: #7F8C8D;
+    }
+
+    .cart-empty i {
+        font-size: 4rem;
+        color: #1B7236;
+        margin-bottom: 20px;
+    }
+
+    .cart-empty h2 {
+        color: #1B7236;
+        margin-bottom: 10px;
+    }
+
+    .cart-empty p {
+        margin-bottom: 30px;
+    }
+
+    .cart-empty a {
+        display: inline-block;
+        background-color: #1B7236;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .cart-empty a:hover {
+        background-color: #0d4620;
+        transform: translateY(-2px);
+    }
+
+    .cart-summary {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        max-width: 350px;
+        margin-left: auto;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        color: #2C3E50;
+    }
+
+    .summary-row.total {
+        border-top: 2px solid #E0E0E0;
+        padding-top: 12px;
+        margin-top: 12px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #FF6B6B;
+    }
+
+    .checkout-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%);
+        color: white;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .checkout-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(27, 114, 54, 0.3);
+    }
+
+    .continue-btn {
+        width: 100%;
+        background: transparent;
+        color: #1B7236;
+        border: 2px solid #1B7236;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+    }
+
+    .continue-btn:hover {
+        background-color: rgba(27, 114, 54, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .cart-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .item-image {
+            width: 100%;
+        }
+
+        .item-actions {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .subtotal {
+            width: 100%;
+            text-align: left;
+        }
+
+        .cart-summary {
+            max-width: 100%;
+            margin-left: 0;
+            margin-top: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <div class="cart-header">
+        <h1>
+            <i class="fas fa-shopping-cart"></i> Giỏ Hàng
+        </h1>
+        <a href="/products/" class="continue-shopping">
+            <i class="fas fa-arrow-left"></i> Tiếp Tục Mua Sắm
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            {% if items %}
+                <div class="cart-items">
+                    {% for item in items %}
+                        <div class="cart-item">
+                            <div class="item-image">
+                                <i class="fas fa-glass-citrus"></i>
+                            </div>
+                            <div class="item-details">
+                                <div class="item-name">{{ item.product.name }}</div>
+                                <div class="item-specs">
+                                    <strong>Kích thước:</strong> {{ item.size }} | 
+                                    <strong>Đường:</strong> {{ item.sugar }}% | 
+                                    <strong>Đá:</strong> {{ item.ice }}
+                                </div>
+                                <div class="item-price">{{ item.product.price|floatformat:0 }} VND/ly</div>
+                                <div class="item-quantity">
+                                    <span><strong>Số lượng:</strong></span>
+                                    <button class="qty-btn" onclick="changeQty({{ item.id }}, -1)">−</button>
+                                    <span style="min-width: 30px; text-align: center;">{{ item.quantity }}</span>
+                                    <button class="qty-btn" onclick="changeQty({{ item.id }}, 1)">+</button>
+                                </div>
+                            </div>
+                            <div class="item-actions">
+                                <div class="subtotal">
+                                    {{ item.product.price|mul:item.quantity|floatformat:0 }} VND
+                                </div>
+                                <button class="remove-btn" onclick="removeItem({{ item.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="cart-empty">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h2>Giỏ Hàng Trống</h2>
+                    <p>Bạn chưa thêm sản phẩm nào vào giỏ hàng. Hãy bắt đầu mua sắm ngay!</p>
+                    <a href="/products/">
+                        <i class="fas fa-shopping-bag"></i> Khám Phá Sản Phẩm
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if items %}
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h3 style="color: #1B7236; margin-bottom: 20px;">
+                        <i class="fas fa-receipt"></i> Tóm Tắt Đơn Hàng
+                    </h3>
+
+                    <div class="summary-row">
+                        <span>Tạm tính:</span>
+                        <span>{{ total|floatformat:0 }} VND</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Phí vận chuyển:</span>
+                        <span>Miễn phí</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Khuyến mãi:</span>
+                        <span>-0 VND</span>
+                    </div>
+
+                    <div class="summary-row total">
+                        <span>Tổng Cộng:</span>
+                        <span>{{ total|floatformat:0 }} VND</span>
+                    </div>
+
+                    <button class="checkout-btn" onclick="window.location.href='{% url 'checkout' %}'">
+                        <i class="fas fa-credit-card"></i> Thanh Toán Ngay
+                    </button>
+
+                    <button class="continue-btn" onclick="window.location.href='/products/'">
+                        <i class="fas fa-shopping-bag"></i> Tiếp Tục Mua
+                    </button>
+
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #E0E0E0; text-align: center; color: #7F8C8D; font-size: 0.9rem;">
+                        <i class="fas fa-truck"></i> Giao hàng toàn thành phố
+                        <br>
+                        <i class="fas fa-shield-alt"></i> Thanh toán an toàn
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function changeQty(itemId, change) {
+    alert('Cập nhật số lượng (chức năng sẽ được thêm)');
+}
+
+function removeItem(itemId) {
+    if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ?')) {
+        alert('Xóa sản phẩm (chức năng sẽ được thêm)');
+    }
+}
+</script>
+{% endblock %}
+    {% endif %}
+</body>
+</html>

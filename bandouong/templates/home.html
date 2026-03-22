@@ -1,20 +1,364 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeaVerse - Website Bán Đồ Uống Thông Minh</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        h1 { color: #4CAF50; }
-        a { margin: 10px; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <h1>Chào mừng đến với TeaVerse!</h1>
-    <p>Website bán đồ uống thông minh với Chatbot AI tư vấn sản phẩm.</p>
-    <a href="/products/">Xem Sản Phẩm</a>
-    <a href="/admin/">Admin Panel</a>
-    <a href="/chatbot/">Chat với AI</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Trang Chủ - TeaVerse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #1B7236 0%, #0d4620 50%, #FF6B6B 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+        border-radius: 12px;
+        margin-bottom: 60px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .hero-section h1 {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .hero-section p {
+        font-size: 1.3rem;
+        margin-bottom: 30px;
+        opacity: 0.95;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 30px;
+    }
+
+    .cta-btn {
+        padding: 12px 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        border: 2px solid;
+    }
+
+    .cta-btn-primary {
+        background-color: white;
+        color: #1B7236;
+        border-color: white;
+    }
+
+    .cta-btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        color: #FF6B6B;
+    }
+
+    .cta-btn-secondary {
+        background-color: #FFA500;
+        color: white;
+        border-color: #FFA500;
+    }
+
+    .cta-btn-secondary:hover {
+        background-color: #FFB820;
+        border-color: #FFB820;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .features-section {
+        margin-bottom: 60px;
+    }
+
+    .feature-card {
+        text-align: center;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        color: #1B7236;
+        margin-bottom: 15px;
+    }
+
+    .feature-card h3 {
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .feature-card p {
+        color: #7F8C8D;
+        line-height: 1.6;
+    }
+
+    .products-preview {
+        margin-bottom: 60px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 250px;
+        background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        overflow: hidden;
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-info {
+        padding: 20px;
+    }
+
+    .product-name {
+        font-weight: bold;
+        color: #1B7236;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+
+    .product-price {
+        color: #FF6B6B;
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        color: #1B7236;
+        font-weight: bold;
+        margin-bottom: 40px;
+        text-align: center;
+        position: relative;
+        padding-bottom: 15px;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, #FFA500, #FF6B6B);
+        border-radius: 2px;
+    }
+
+    .star-rating {
+        color: #FFA500;
+        margin: 5px 0;
+    }
+
+    @media (max-width: 768px) {
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+
+        .hero-section p {
+            font-size: 1rem;
+        }
+
+        .cta-buttons {
+            flex-direction: column;
+        }
+
+        .cta-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <h1><i class="fas fa-glass-citrus"></i> TeaVerse - Thế Giới Đồ Uống</h1>
+    <p>Khám phá những thức uống tuyệt vời với hệ thống tư vấn AI thông minh</p>
+    <div class="cta-buttons">
+        <a href="/products/" class="cta-btn cta-btn-primary">
+            <i class="fas fa-shopping-bag"></i> Xem Sản Phẩm
+        </a>
+        <a href="/chatbot/" class="cta-btn cta-btn-secondary">
+            <i class="fas fa-robot"></i> Chat Với AI
+        </a>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+    <h2 class="section-title">
+        <i class="fas fa-star"></i> Tại Sao Chọn TeaVerse?
+    </h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3>Sản Phẩm Chất Lượng</h3>
+                <p>Các thức uống được lựa chọn kỹ lưỡng từ những nguyên liệu tốt nhất, đảm bảo chất lượng hàng đầu.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>Chatbot AI 24/7</h3>
+                <p>Trợ lý AI thông minh sẵn sàng giúp bạn chọn lựa sản phẩm phù hợp bất kỳ lúc nào.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h3>Giao Hàng Nhanh</h3>
+                <p>Vận chuyển toàn bộ thành phố với thời gian giao hàng nhanh chóng và an toàn.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Preview -->
+<div class="products-preview">
+    <h2 class="section-title">
+        <i class="fas fa-hot"></i> Sản Phẩm Nổi Bật
+    </h2>
+    <div class="row g-4">
+        <div class="col-md-3 col-sm-6">
+            <a href="/products/" class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-mug-hot"></i>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">Trà Xanh Nhài</div>
+                    <div class="star-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <div class="product-price">45,000 VND</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <a href="/products/" class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-fan"></i>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">Cà Phê Đen Đá</div>
+                    <div class="star-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="product-price">35,000 VND</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <a href="/products/" class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-apple-alt"></i>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">Nước Ép Cam Tươi</div>
+                    <div class="star-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <div class="product-price">40,000 VND</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <a href="/products/" class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-milkshake"></i>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">Sữa Đậu Nành Lạnh</div>
+                    <div class="star-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="product-price">38,000 VND</div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="/products/" class="btn btn-primary" style="padding: 12px 40px; font-size: 1rem;">
+            <i class="fas fa-eye"></i> Xem Tất Cả Sản Phẩm
+        </a>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div style="background: linear-gradient(135deg, #1B7236 0%, #0d4620 100%); color: white; padding: 50px; border-radius: 12px; text-align: center; margin: 60px 0;">
+    <h2 style="font-size: 2rem; margin-bottom: 20px;">
+        <i class="fas fa-bell"></i> Bạn Chưa Tham Gia Cộng Đồng TeaVerse?
+    </h2>
+    <p style="font-size: 1.1rem; margin-bottom: 30px; opacity: 0.95;">
+        Đăng ký ngay để nhận những ưu đãi đặc biệt và theo dõi những sản phẩm mới!
+    </p>
+    {% if not user.is_authenticated %}
+        <a href="{% url 'register' %}" class="btn btn-light" style="padding: 12px 40px; font-size: 1rem; font-weight: 600;">
+            <i class="fas fa-user-plus"></i> Đăng Ký Ngay
+        </a>
+    {% else %}
+        <a href="/products/" class="btn" style="background-color: white; color: #1B7236; padding: 12px 40px; font-size: 1rem; font-weight: 600;">
+            <i class="fas fa-shopping-bag"></i> Bắt Đầu Mua Hàng
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
